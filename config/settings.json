@@ -1,0 +1,19 @@
+{
+    "whitelist_domains": [],
+    "excluded_extensions": [
+        ".png",
+        ".jpg",
+        ".jpeg",
+        ".gif",
+        ".css",
+        ".js",
+        ".woff",
+        ".woff2",
+        ".ttf",
+        ".svg",
+        ".ico",
+        ".map"
+    ],
+    "output_file": "data/api_inventory.json",
+    "teams_webhook_url": ""
+}

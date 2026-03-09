@@ -1,0 +1,21 @@
+{
+    "whitelist_domains": [
+        "direct.hanwhalife.com",
+        "api.hanwhalife.com"
+    ],
+    "excluded_extensions": [
+        ".png",
+        ".jpg",
+        ".jpeg",
+        ".gif",
+        ".css",
+        ".js",
+        ".woff",
+        ".woff2",
+        ".ttf",
+        ".svg",
+        ".ico",
+        ".map"
+    ],
+    "output_file": "data/api_inventory.json"
+}

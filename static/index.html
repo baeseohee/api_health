@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Health & Monitor</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body>
+    <header>
+        <h1><i class="fas fa-satellite-dish"></i> API Monitor</h1>
+        <div class="subtitle">Log-based Automated Health Check</div>
+    </header>
+
+    <div class="container">
+        <div class="nav-tabs" style="display: flex; gap: 1rem; margin-bottom: 2rem; border-bottom: 2px solid #3e3e42;">
+            <a href="/" class="nav-tab"
+                style="padding: 1rem 1.5rem; background: transparent; border: none; color: #61afef; cursor: pointer; font-size: 1rem; border-bottom: 3px solid #61afef; text-decoration: none; transition: all 0.3s;">
+                <i class="fas fa-upload"></i> Upload & Test
+            </a>
+            <a href="/monitor" class="nav-tab"
+                style="padding: 1rem 1.5rem; background: transparent; border: none; color: #858585; cursor: pointer; font-size: 1rem; border-bottom: 3px solid transparent; text-decoration: none; transition: all 0.3s;">
+                <i class="fas fa-chart-line"></i> Monitor
+            </a>
+        </div>
+
+        <!-- Upload Section -->
+        <div id="dropZone" class="upload-area">
+            <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+            <h3 style="margin-bottom: 0.5rem; color: #fff;">Import HAR File</h3>
+            <p style="color: #858585; margin-bottom: 1.5rem; font-size: 0.9rem;">Drag and drop your .har file here to
+                analyze user journey</p>
+            <input type="file" id="fileInput" accept=".har" style="display:none">
+
+            <div style="display:flex; justify-content: center; align-items: center; gap: 10px;">
+                <button class="btn" onclick="document.getElementById('fileInput').click()">Select File</button>
+                <div id="fileInfo" style="font-size: 0.9rem; color: #fff;"></div>
+            </div>
+
+            <div id="loading" class="hidden"
+                style="margin-top: 1rem; color: var(--text-dim); display: flex; align-items: center; justify-content: center;">
+                <span class="loader"></span> Processing...
+            </div>
+        </div>
+
+        <div id="runControls" class="hidden" style="text-align: center; margin-bottom: 2rem;">
+            <button id="runBtn" class="btn"><i class="fas fa-play"></i> Run Health Check</button>
+            <button id="downloadBtn" class="btn" style="background-color: #4a4a4a; margin-left: 10px;" disabled><i
+                    class="fas fa-download"></i> Download Report</button>
+        </div>
+
+        <!-- Results Section -->
+        <div id="resultsSection" class="hidden">
+            <div class="stats-ribbon">
+                <div class="stat-item">Total Requests: <span id="totalCount" class="stat-val">0</span></div>
+                <div class="stat-item">Passed: <span id="successCount" class="stat-val val-success">0</span></div>
+                <div class="stat-item">Failed: <span id="failCount" class="stat-val val-fail">0</span></div>
+            </div>
+
+            <div class="results-table-container">
+                <table id="resultsTable">
+                    <thead>
+                        <tr>
+                            <th style="width: 80px;">Method</th>
+                            <th>Request URL</th>
+                            <th style="width: 100px;">Status</th>
+                            <th style="width: 100px;">Time</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+
+</html>

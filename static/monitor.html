@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Monitor Dashboard</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .metric-card {
+            background: #252526;
+            border: 1px solid #3e3e42;
+            border-radius: 8px;
+            padding: 1.5rem;
+            transition: transform 0.2s;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-2px);
+            border-color: #61afef;
+        }
+
+        .metric-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .metric-title {
+            font-size: 0.9rem;
+            color: #858585;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .metric-icon {
+            font-size: 2rem;
+            opacity: 0.3;
+        }
+
+        .chart-container {
+            background: #252526;
+            border: 1px solid #3e3e42;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            height: 400px;
+        }
+
+        .scheduler-controls {
+            background: #252526;
+            border: 1px solid #3e3e42;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .control-row {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        .status-running {
+            background: rgba(115, 201, 144, 0.2);
+            color: #73c990;
+        }
+
+        .status-stopped {
+            background: rgba(252, 160, 160, 0.2);
+            color: #fca0a0;
+        }
+
+        input[type="number"] {
+            background: #1e1e1e;
+            border: 1px solid #3e3e42;
+            color: #fff;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            width: 100px;
+        }
+
+        .history-table {
+            background: #252526;
+            border: 1px solid #3e3e42;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .history-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .history-table th {
+            background: #2d2d30;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .history-table td {
+            padding: 0.75rem 1rem;
+            border-top: 1px solid #3e3e42;
+        }
+
+        .success-rate {
+            font-weight: bold;
+        }
+
+        .rate-high {
+            color: #73c990;
+        }
+
+        .rate-medium {
+            color: #e5c07b;
+        }
+
+        .rate-low {
+            color: #fca0a0;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #3e3e42;
+        }
+
+        .nav-tab {
+            padding: 1rem 1.5rem;
+            background: transparent;
+            border: none;
+            color: #858585;
+            cursor: pointer;
+            font-size: 1rem;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .nav-tab:hover {
+            color: #fff;
+        }
+
+        .nav-tab.active {
+            color: #61afef;
+            border-bottom-color: #61afef;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1><i class="fas fa-chart-line"></i> API Monitor Dashboard</h1>
+        <div class="subtitle">Real-time Health Monitoring & Analytics</div>
+    </header>
+
+    <div class="container">
+        <div class="nav-tabs">
+            <a href="/" class="nav-tab"><i class="fas fa-upload"></i> Upload & Test</a>
+            <a href="/monitor" class="nav-tab active"><i class="fas fa-chart-line"></i> Monitor</a>
+        </div>
+
+        <!-- Scheduler Controls -->
+        <div class="scheduler-controls">
+            <h2 style="margin-bottom: 1rem;"><i class="fas fa-clock"></i> Scheduler</h2>
+            <div class="control-row">
+                <div>
+                    <label style="color: #858585; margin-right: 0.5rem;">Interval (minutes):</label>
+                    <input type="number" id="intervalInput" value="5" min="1" max="1440">
+                </div>
+                <button id="startBtn" class="btn"><i class="fas fa-play"></i> Start</button>
+                <button id="stopBtn" class="btn" style="background-color: #e06c75;"><i class="fas fa-stop"></i>
+                    Stop</button>
+                <div id="statusBadge" class="status-badge status-stopped">Stopped</div>
+                <div id="nextRun" style="color: #858585; margin-left: auto;"></div>
+            </div>
+        </div>
+
+        <!-- Metrics Grid -->
+        <div class="dashboard-grid">
+            <div class="metric-card">
+                <div class="metric-header">
+                    <div>
+                        <div class="metric-title">Total Checks</div>
+                        <div class="metric-value" id="totalChecks">0</div>
+                    </div>
+                    <i class="fas fa-list-check metric-icon"></i>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-header">
+                    <div>
+                        <div class="metric-title">Success Rate</div>
+                        <div class="metric-value" id="successRate">0%</div>
+                    </div>
+                    <i class="fas fa-percentage metric-icon"></i>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-header">
+                    <div>
+                        <div class="metric-title">Last Check</div>
+                        <div class="metric-value" style="font-size: 1.2rem;" id="lastCheck">Never</div>
+                    </div>
+                    <i class="fas fa-clock metric-icon"></i>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-header">
+                    <div>
+                        <div class="metric-title">Failed APIs</div>
+                        <div class="metric-value" id="failedCount">0</div>
+                    </div>
+                    <i class="fas fa-exclamation-triangle metric-icon"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart -->
+        <div class="chart-container">
+            <canvas id="healthChart"></canvas>
+        </div>
+
+        <!-- History Table -->
+        <div class="history-table">
+            <h2 style="padding: 1rem; margin: 0;"><i class="fas fa-history"></i> Check History</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>Total</th>
+                        <th>Passed</th>
+                        <th>Failed</th>
+                        <th>Success Rate</th>
+                    </tr>
+                </thead>
+                <tbody id="historyBody">
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: #858585;">No data available</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="/static/monitor.js"></script>
+</body>
+
+</html>
